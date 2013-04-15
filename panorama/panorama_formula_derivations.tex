@@ -4,7 +4,29 @@
 
 
 
+\title{Equations for Spherical Panoramas}
+\author{Sergei Radutnuy}
+
 \begin{document}
+\maketitle
+\section{Lens Basics/introduction - ?}
+what a lens does to an image. this is probably gonna be a subset of projections
+\section{Field of View}
+what it means intuitively, rigorously.the field of view 
+equation how it's derived
+\section{Projections onto the Sphere}
+draw a few spheres illustrating why it's not just pitch += constant 
+and yaw += constant; lines of latitude vs. lines of longitude \& rectangular
+sectors.
+\\
+easiest way to explain this, just map the 4 corners of the image...
+\section{Determining Coordinates for a Panorama}
+WLOG assume you're incrementing the pitch by the same amount each time
+(what the code actually does) and then determining how much to increment the
+pitch for every row. use the 4-corner / top/bottom mapping examples. how 
+overlap was determined naively
 
-
+\section{expansion - how to give area of overlap? does anyone care?}
+some nasty looking solid angle integrals
+\section{another expansion - what if you have a weird lens}
 \end{document}
