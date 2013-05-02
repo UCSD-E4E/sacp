@@ -12,7 +12,7 @@
  * Author: Sergei I. Radutnuy                 *
  *         sradutnu@ucsd.edu                  *
  *                                            *
- * Last Modified: April 14 2013               *
+ * Last Modified: May 2 2013                  *
  **********************************************/
 
 #include <stdio.h>
@@ -26,6 +26,28 @@
 double deg2rad = pi/180.0;
 double rad2deg = 180.0/pi;
 
+/* Constraints on start point yaw and pitch */
+#define MAX_S_Y 180.0 
+#define MIN_S_Y -180.0
+#define MAX_S_P 90.0
+#define MIN_S_P -90.0
+
+/* Start point ranges for printing convenience */
+#define S_Y_RANGE "[-180.0,180.0]"
+#define S_P_RANGE "[-90.0,90.0]"
+
+/* Constraints on how far panorama can travel */
+#define R_EDGE 180.0
+#define L_EDGE -180.0
+#define TOP_EDGE 90.0
+#define BOT_EDGE -90.0
+
+/* Panorama max travel ranges for printing convenience */
+#define R_RANGE "[0.0,180.0]"
+#define L_RANGE "[-180.0,0.0]"
+#define UP_RANGE "[0.0,90.0]"
+#define DOWN_RANGE "[-90.0,0.0]"
+
 
 /* double fov( focal length, sensor dimension )
  *
@@ -38,7 +60,7 @@ double rad2deg = 180.0/pi;
  * values measured with the same unit.
  */
 double fov( double f, double d ) {
-  return 2*rad2deg*atan( 0.5*(d/flength) );
+  return 2*rad2deg*atan( 0.5*d/f );
 }
 
 /* struct to hold coordinates for a point. y = yaw, p = pitch*/
@@ -54,10 +76,9 @@ typedef struct point {
  * making sure the yaw and pitch of the result is within the
  * yaw/pitch domain [-180,180]X[-90,90]
  *
- * DEPENDS ON SPECIFIC SPHERE/IMU PARAMETRIZATION
+ * DEPENDS ON SPECIFIC IMU SPHERE PARAMETRIZATION
  */
 point shiftPt( point* c, point* s ) {
-  
   /* keep track of quotient of mod */
   int modcount = 0;
 
@@ -67,35 +88,42 @@ point shiftPt( point* c, point* s ) {
   if( ty < -180.0 ) {
     while( ty < -180.0 ) { 
       ty += 180.0; 
-      ++n;
+      ++modcount;
     }
     /* n even - you've added int*360, do nothing */
-    if ( n % 2 != 0 ) 
-      /* n odd - you're in the other hemisphere now*/
-      ty += 180.0;    
-  }
+    /* n odd - you're in the other hemisphere now */
+    if ( modcount % 2 ) ty += 180.0;    
+  } 
   /* same explanation as 1st if */
   else if( 180.0 < ty ) {
-    while( 180.0 < ty ) { 
-      ty -= 180.0; 
-      ++n;
+      while( 180.0 < ty ) { 
+        ty -= 180.0; 
+        ++modcount;
+      }
+      if( modcount % 2 ) ty += -180.0;
     }
-    if( n % 2 != 0 )  
-      ty += -180.0;
-  }
 
   /* reset for pitches */
   modcount = 0;
 
   /* sum & "mod" pitches */
   double tp = c->p + s->p; 
+  
   if( tp < -90.0 ) {
-    while( tp < -90.0 ) { tp += 90.0; }
-    tp += 90.0;
-  }
+    while( tp < -90.0 ) { 
+      tp += 180.0; 
+      ++modcount;
+    }
+    /* again, adding 180 is a hemisphere switch */
+    if( modcount % 2 ) tp *= -1.0;
+  
+  } 
   else if( 90.0 < tp ) {
-    while( 90.0 < tp ) { tp -= 90.0; }
-    tp += -90.0;
+    while( 90.0 < tp ) { 
+      tp -= 180.0; 
+      ++modcount;
+    }
+    if( modcount % 2 ) tp *= -1.0;
   }
 
   point tpt = { ty, tp };
@@ -117,8 +145,10 @@ void printPt( point x, FILE* outf ) {
  *
  * Calculates appropriate yaw increment for a given point in param domain, 
  * fields of view, and overlap
+ *
+ * DEPENDS ON SPECIFIC IMU SPHERE PARAMETERIZATION
  */
-double yawDelta( int pitchx, int hfov, int vfov, double ol ) {
+double yawDelta( int pitch, int hfov, int vfov, double ol ) {
   
   /* top and bottom pitches of the rectangle */
   double top =  pitch + (int)( 0.5*vfov );
@@ -149,48 +179,5 @@ double yawDelta( int pitchx, int hfov, int vfov, double ol ) {
     return 0.1*roundbot;
   }
 }  
-
-/*** DEPRECATED but possibly still useful *******/
-
-/* int isInRange( boundary point, boundary point, 
- *                current point, buffer )
- * 
- * Returns true (non-zero int) or false (0) depending on whether 
- * or not the current point's yaw is in the interval given by 
- * (least allowable yaw - buffer, greatest allowable yaw + buffer)
- */
-int isInYawRange( point* b1, point* b2, point* c, double buff ){
-  
-  /* boundaries within 1/10th of degree - return false */
-  if( fabs(b1->y - b2->y) < 0.1 )
-    return 0;
-  
-  /* negest is lowest allowable yaw */
-  double negest = b1->y < b2->y ? b1->y : b2->y;
-  /* posest is  highest allowable yaw */
-  double posest = b1->y < b2->y ? b2->y : b1->y;
-  return ( negest - buff < c->y ) && ( c->y < posest );      
-}
-
-
-/* int isInPitchRange ( boundary point, boundary point, 
- *                      current point, buffer )
- * 
- * Returns true (non-zero int) or false (0) depending on whether 
- * or not the current point's pitch is in the interval given by 
- * (least allowable pitch - buffer, greatest allowable pitch + buffer)
- */
-int isInPitchRange( point* b1, point* b2, point* c, double buff ){
-  
-  /* boundaries within 1/10th of degree - return false */
-  if( fabs(m->p - M->p) < 0.1 )
-    return 0;
-  
-  /* negest is lowest allowable pitch */
-  double negest = b1->p < b2->p ? b1->p : b2->p;
-  /* posest is  highest allowable pitch */
-  double posest = b1->p < b2->p ? b2->p : b1->p;
-  return ( negest - buff < c->p ) && ( c->p < posest + buff );      
-}
 
 #endif /* GIGAPAN */
