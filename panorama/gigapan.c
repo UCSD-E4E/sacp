@@ -134,9 +134,9 @@ int main( int argc, char** argv ) {
     }
     
     sscanf( argv[11], "%lf", &yover );
-    if( yover < -100.0 || 100.0 < yover ) {
+    if( yover < -100.0 || 50.0 < yover ) {
       fprintf( stderr, "\nVertical overlap percentage needs to be in range " );
-      fprintf( stderr, "[-100.0,100.0] \n" );
+      fprintf( stderr, "[-100.0,50.0] \n" );
       ++problem;
     }
     
@@ -181,7 +181,7 @@ int main( int argc, char** argv ) {
     puts( "\nPercent horizontal, vertical overlap between images? This is " );
     puts( "the minimum amount by which a picture overlaps with its "        );
     puts( "neighbor. A negative percentage puts space between images. "     );
-    puts( "Enter 2 numbers between -100.0 and 100.0, horizontal then "      );
+    puts( "Enter 2 numbers between -100.0 and 50.0, horizontal then "      );
     puts( "vertical.\n"                                                     );
     scanf( "%lf %lf", &hover, &yover );
 
