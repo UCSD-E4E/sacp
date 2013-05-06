@@ -19,3 +19,5 @@ gigapan.o: gigapan.h
 clean:
 	rm -f gigapan *.o
 
+# remake - make clean && make
+re: clean gigapan

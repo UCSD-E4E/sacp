@@ -134,7 +134,7 @@ point shiftPt( point* c, point* s ) {
  * 
  * Prints out coordinates of the given point, to tenth of degree
  * accuracy, in the following format:
- * yaw pitch<newline>
+ * yaw<tab>pitch<newline>
  */
 void printPt( point x, FILE* outf ) {
   fprintf( outf, "%.1f\t%.1f\n", x.y, x.p );
@@ -159,7 +159,7 @@ double yawDelta( int pitch, int hfov, int vfov, double ol ) {
   double eqdisbot = fabs(bottom);
   
   /* factor in overlap */
-  hfov *= (1.0 - 0.02*ol);
+  hfov *= (1.0 - 0.01*ol);
   
   /* Length of a rectangle's side (top or bottom) when projected
    * onto sphere is (hfov * overlap factor) * cos( pitch ). 

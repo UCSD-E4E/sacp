@@ -13,15 +13,16 @@
 
 #include "gigapan.h"
 
-void usage() {
+void   usage() {
   puts( "\nTo enter command line arguments and skip dialog:\n" );
   
-  printf( "gigapan <focal length> <sensor width> <sensor height> "     );
-  printf( "<start yaw> <start pitch> <how right> <how left> <how up> " ); 
-  puts(   "<how down> <horizontal overlap> <vertical overlap>\n"       );
+  puts( "gigapan <focal length> <sensor width> <sensor height>"    );
+  puts( "        <start yaw> <start pitch> <how right> <how left>" );
+  puts( "        <how up> <how down> <horizontal overlap>"         );
+  puts( "        <vertical overlap>\n"                               );
 
-  printf( "There should be 12 arguments total, and this message will be " );
-  puts(   "printed again if there is an error in any of them.\n"          );
+  printf( "There should be 12 arguments total, and this message will be\n " );
+  printf( "printed again if there is an error in any of them.\n"            );
 }
 
 
@@ -140,9 +141,7 @@ int main( int argc, char** argv ) {
     }
     
     sscanf( argv[12], "%d", &opt );
-   
-    printf( "%d", problem );
-     
+    
     if( problem ) {
       usage();
       printf("\nThere were %d problems total\n", problem);
@@ -175,13 +174,13 @@ int main( int argc, char** argv ) {
     printf( "in range %s\n\n", UP_RANGE                                    );
     scanf( "%lf", &(top_right->p) );
 
-    puts( "\nHow far down should the gigapan go? Enter a number of degrees " );
-    printf( "in range %s\n\n" DOWN_RANGE                                     );
+    puts( "\nHow far down should the gigapan go? Enter a number of" );
+    printf( "degrees in range %s\n\n", DOWN_RANGE                      );
     scanf( "%lf", &(bot_left->p) );
   
     puts( "\nPercent horizontal, vertical overlap between images? This is " );
-    puts( " the minimum amount by which a picture overlaps with its "       );
-    puts( " neighbor. A negative percentage puts space between images. "    );
+    puts( "the minimum amount by which a picture overlaps with its "        );
+    puts( "neighbor. A negative percentage puts space between images. "     );
     puts( "Enter 2 numbers between -100.0 and 100.0, horizontal then "      );
     puts( "vertical.\n"                                                     );
     scanf( "%lf %lf", &hover, &yover );
@@ -234,13 +233,16 @@ int main( int argc, char** argv ) {
  
   /* yaw incremement - defaults to HFOV w/ overlap factored in, 
    * optimized using the yawDelta function if optimization is chosen */
-  double ydelta = (1.0 - 0.02*hover)*HFOV;
+  double ydelta = (1.0 - 0.01*hover)*HFOV;
   
   /* pitch incremement for the pan, stays the same throughout.
    * Simply vertical field of view with overlap factored in.*/ 
-  double pdelta = (1.0 - 0.02*yover)*VFOV;
+  double pdelta = (1.0 - 0.01*yover)*VFOV;
  
-  /* Top half first. Starts at start point, zigzags across rows */
+  /* print the first point */
+  printPt( *start, output );
+
+  /* Top half first. Starts to the right of start point, zigzags across rows */
   /* begin loop for top half pitches */
   do {
     /* optimize the yaw increment */
@@ -248,10 +250,10 @@ int main( int argc, char** argv ) {
     
     /* loop for a single yaw row */ 
     do  {
-      /* print current point in row */
-      printPt( shiftPt( curr, start ), output );
       /* increment the yaw */
       curr->y += hdir*ydelta;
+      /* print current point in row */
+      printPt( shiftPt( curr, start ), output );
       /* until the yaw is out of bounds */
     } while( bot_left->y - ydelta < curr->y 
              && curr->y < top_right->y + ydelta ) ;
@@ -264,10 +266,10 @@ int main( int argc, char** argv ) {
   } while( curr->p < top_right->p + pdelta ); 
 
   /* reset the current displacement from start point */
-  curr->p = 0.0;
+  curr->p = 0.0; curr->y = 0.0;
   /* increment the yaw once, so as not to double print the middle point*/
-  if( opt ) ydelta = yawDelta( start->p, HFOV, VFOV, hover );
-  curr->y = -1.0*ydelta;
+ /*  if( opt ) ydelta = yawDelta( start->p, HFOV, VFOV, hover ); 
+  curr->y = -1.0*ydelta; */
   /* start moving in opposite direction of first half of middle row */
   hdir = -1.0;
 
@@ -278,10 +280,10 @@ int main( int argc, char** argv ) {
     
     /* loop for single yaw row */
     do {  
-      /* print current point in row */
-      printPt( shiftPt( curr, start ), output );
       /* incremement the yaw */
       curr->y += hdir*ydelta;
+      /* print current point in row */
+      printPt( shiftPt( curr, start ), output );
       /* until the yaw is out of range */
     } while( bot_left->y - ydelta < curr->y 
              && curr->y < top_right->y + ydelta );
@@ -300,7 +302,7 @@ int main( int argc, char** argv ) {
   }
   
   puts( "\nThe program has completed successfully. Check \"coords.txt\"" );
-  puts( "in the current directory." );
+  puts( "in the current directory.\n" );
   
   /* memory management */
   free(start); free(top_right); free(bot_left); free(curr); 
