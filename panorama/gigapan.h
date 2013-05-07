@@ -12,7 +12,7 @@
  * Author: Sergei I. Radutnuy                 *
  *         sradutnu@ucsd.edu                  *
  *                                            *
- * Last Modified: May 2 2013                  *
+ * Last Modified: May 7 2013                  *
  **********************************************/
 
 #include <stdio.h>
@@ -87,8 +87,7 @@ point shiftPt( point* c, point* s ) {
   /* yaw < -180 -> add 180 until ok */ 
   if( ty < -180.0 ) {
     while( ty < -180.0 ) { 
-      ty += 180.0; 
-      ++modcount;
+      ty += 180.0; ++modcount;
     }
     /* n even - you've added int*360, do nothing */
     /* n odd - you're in the other hemisphere now */
@@ -96,32 +95,28 @@ point shiftPt( point* c, point* s ) {
   } 
   /* same explanation as 1st if */
   else if( 180.0 < ty ) {
-      while( 180.0 < ty ) { 
-        ty -= 180.0; 
-        ++modcount;
-      }
-      if( modcount % 2 ) ty += -180.0;
+    while( 180.0 < ty ) { 
+      ty -= 180.0; ++modcount;
     }
+    if( modcount % 2 ) ty += -180.0;
+  }
 
   /* reset for pitches */
   modcount = 0;
 
   /* sum & "mod" pitches */
   double tp = c->p + s->p; 
-  
   if( tp < -90.0 ) {
     while( tp < -90.0 ) { 
-      tp += 180.0; 
-      ++modcount;
+      tp += 180.0; ++modcount;
     }
-    /* again, adding 180 is a hemisphere switch */
+    /* Adding a multiple of 180 is a hemisphere switch;  
+     * any addition of an odd multiple of 90 is left as is. */
     if( modcount % 2 ) tp *= -1.0;
-  
   } 
   else if( 90.0 < tp ) {
     while( 90.0 < tp ) { 
-      tp -= 180.0; 
-      ++modcount;
+      tp -= 180.0; ++modcount;
     }
     if( modcount % 2 ) tp *= -1.0;
   }
@@ -140,26 +135,26 @@ void printPt( point x, FILE* outf ) {
   fprintf( outf, "%.1f\t%.1f\n", x.y, x.p );
 }
 
-/* double yawDelta ( current point, horizontal field of view, 
- *                   vertical field of view, horizontal overlap ) 
+/* double yawDelta ( current pitch, horizontal field of view, 
+ *                   pitch increment, horizontal overlap ) 
  *
  * Calculates appropriate yaw increment for a given point in param domain, 
  * fields of view, and overlap
  *
  * DEPENDS ON SPECIFIC IMU SPHERE PARAMETERIZATION
  */
-double yawDelta( int pitch, int hfov, int vfov, double ol ) {
+double yawDelta( int pitch, int hfov, int pdelt, double hol ) {
   
   /* top and bottom pitches of the rectangle */
-  double top =  pitch + (int)( 0.5*vfov );
-  double bottom = pitch - (int)( 0.5*vfov );
+  double top =  pitch + (int)( 0.5*pdelt );
+  double bottom = pitch - (int)( 0.5*pdelt );
   
   /* distance of pitch from equator (just |pitch|) */ 
   double eqdistop = fabs(top);
   double eqdisbot = fabs(bottom);
   
   /* factor in overlap */
-  hfov *= (1.0 - 0.01*ol);
+  hfov *= (1.0 - 0.01*hol);
   
   /* Length of a rectangle's side (top or bottom) when projected
    * onto sphere is (hfov * overlap factor) * cos( pitch ). 
@@ -175,7 +170,7 @@ double yawDelta( int pitch, int hfov, int vfov, double ol ) {
   /* bottom closer to equator, or they're the same, use bottom */
   else {
     /* round to nearest 10th of degree & return */
-    double roundbot = (int) 10.0*hfov/cos( deg2rad*top ) + 0.5;
+    double roundbot = (int) 10.0*hfov/cos( deg2rad*bottom ) + 0.5;
     return 0.1*roundbot;
   }
 }  

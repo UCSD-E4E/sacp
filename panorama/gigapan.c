@@ -8,18 +8,18 @@
  * Author: Sergei I. Radutnuy                 *
  *         sradutnu@ucsd.edu                  *
  *                                            *
- * Last Modified: May 2 2013                  *
+ * Last Modified: May 7 2013                  *
  **********************************************/
 
 #include "gigapan.h"
 
-void   usage() {
+void usage() {
   puts( "\nTo enter command line arguments and skip dialog:\n" );
   
   puts( "gigapan <focal length> <sensor width> <sensor height>"    );
   puts( "        <start yaw> <start pitch> <how right> <how left>" );
   puts( "        <how up> <how down> <horizontal overlap>"         );
-  puts( "        <vertical overlap>\n"                               );
+  puts( "        <vertical overlap>\n"                             );
 
   printf( "There should be 12 arguments total, and this message will be\n " );
   printf( "printed again if there is an error in any of them.\n"            );
@@ -55,98 +55,19 @@ int main( int argc, char** argv ) {
   
 
   /***** Command line args processing (could also use interactive dialog) ****/
-  
-  /* If you're using command line arguments to save time: */
   if( argc == 13 ) {
-
-    /* int/boolean for number of problems encountered */
-    int problem = 0;
-    
-    /* interpret every argument string as a double, do checks for correctness */
-    sscanf( argv[1], "%lf", &flength );
-    if( !( 0.0 < flength ) ) {
-      fprintf( stderr, "\nFocal length needs to be greater than 0.\n" );
-      ++problem;
-    }
-
-    sscanf( argv[2], "%lf", &sensw );
-    if( !( 0.0 < sensw ) ) {
-      fprintf( stderr, "\nSensor width needs to be greater than 0.\n" );
-      ++problem;
-    }
-    
-    sscanf( argv[3], "%lf", &sensh );
-    if( !( 0.0 < sensh ) ) {
-      fprintf( stderr, "\nSensor height needs to be greater than 0.\n" );
-      ++problem;
-    }
-
-    sscanf( argv[4], "%lf", &(start->y) ); 
-    if( start->y < MIN_S_Y || MAX_S_Y < start->y ) {
-      fprintf( stderr, "\nStarting yaw needs to be in interval %s\n", 
-               S_Y_RANGE );
-      ++problem;
-    }
-
-    sscanf( argv[5], "%lf", &(start->p) ); 
-    if( start->p < MIN_S_P || MAX_S_P < start->p ) {
-      fprintf( stderr, "\nStarting pitch needs to be in interval %s\n", 
-               S_P_RANGE );
-      ++problem;
-    }
-
-    sscanf( argv[6], "%lf", &(top_right->y) );
-    if( top_right->y < 0.0 || R_EDGE < top_right->y ) {
-      fprintf( stderr, 
-               "\nAmount panorama goes to the right must be in interval %s\n",  
-               R_RANGE );
-      ++problem;
-    }
-
-    sscanf( argv[7], "%lf", &(bot_left->y) ); 
-    if( bot_left->y < L_EDGE || 0.0 < bot_left->y ) {
-      fprintf( stderr, 
-               "\nAmount panorama goes to the left must be in interval %s\n", 
-               L_RANGE );
-      ++problem;
-    }
-    
-    sscanf( argv[8], "%lf", &(top_right->p) );
-    if( top_right->p < 0.0 || TOP_EDGE < top_right->p ) {
-      fprintf( stderr, "\nAmount panorama goes up to be in interval %s\n", 
-            UP_RANGE );
-      ++problem;
-    }
-    
-    sscanf( argv[9], "%lf", &(bot_left->p) );
-    if( bot_left->p < BOT_EDGE || 0.0 < bot_left->p ) {
-      fprintf( stderr, 
-               "\nAmount panorama goes down needs to be in interval %s\n",
-               DOWN_RANGE );
-      ++problem;
-    }
-
-    sscanf( argv[10], "%lf", &hover );
-    if( hover < -100.0 || 100.0 < hover ) {
-      fprintf( stderr, "\nHorizontal overlap percentage needs to be in range " );
-      fprintf( stderr, "[-100.0,100.0] \n" );
-      ++problem;
-    }
-    
-    sscanf( argv[11], "%lf", &yover );
-    if( yover < -100.0 || 50.0 < yover ) {
-      fprintf( stderr, "\nVertical overlap percentage needs to be in range " );
-      fprintf( stderr, "[-100.0,50.0] \n" );
-      ++problem;
-    }
-    
-    sscanf( argv[12], "%d", &opt );
-    
-    if( problem ) {
-      usage();
-      printf("\nThere were %d problems total\n", problem);
-      return -1;
-    }
+    sscanf( argv[1],  "%lf", &flength        );
+    sscanf( argv[2],  "%lf", &sensw          );
+    sscanf( argv[3],  "%lf", &sensh          );
+    sscanf( argv[4],  "%lf", &(start->y)     ); 
+    sscanf( argv[5],  "%lf", &(start->p)     ); 
+    sscanf( argv[6],  "%lf", &(top_right->y) );
+    sscanf( argv[7],  "%lf", &(bot_left->y)  ); 
+    sscanf( argv[8],  "%lf", &(top_right->p) );
+    sscanf( argv[9],  "%lf", &(bot_left->p)  );
+    sscanf( argv[10], "%lf", &hover          );
+    sscanf( argv[11], "%lf", &yover          );
+    sscanf( argv[12], "%d",  &opt            );
   }
 
 
@@ -201,10 +122,87 @@ int main( int argc, char** argv ) {
     usage();
     return -1;
   }
+
+  /********** Entered parameter error & bounds checking ***********************/
   
+  /* int/boolean for number of problems encountered */
+  int problem = 0;
+
+  if( !( 0.0 < flength ) ) {
+    fprintf( stderr, "\nFocal length needs to be greater than 0.\n" );
+    ++problem;
+  }
+
+  if( !( 0.0 < sensw ) ) {
+    fprintf( stderr, "\nSensor width needs to be greater than 0.\n" );
+    ++problem;
+  }
+
+  if( !( 0.0 < sensh ) ) {
+    fprintf( stderr, "\nSensor height needs to be greater than 0.\n" );
+    ++problem;
+  }
+
+  if( start->y < MIN_S_Y || MAX_S_Y < start->y ) {
+    fprintf( stderr, "\nStarting yaw needs to be in interval %s\n", 
+             S_Y_RANGE );
+    ++problem;
+  }
+
+  if( start->p < MIN_S_P || MAX_S_P < start->p ) {
+    fprintf( stderr, "\nStarting pitch needs to be in interval %s\n", 
+             S_P_RANGE );
+    ++problem;
+  }
+
+  if( top_right->y < 0.0 || R_EDGE < top_right->y ) {
+    fprintf( stderr, 
+             "\nAmount panorama goes to the right must be in interval %s\n",  
+             R_RANGE );
+    ++problem;
+  }
+
+  if( bot_left->y < L_EDGE || 0.0 < bot_left->y ) {
+    fprintf( stderr, 
+             "\nAmount panorama goes to the left must be in interval %s\n", 
+             L_RANGE );
+    ++problem;
+  }
+
+  if( top_right->p < 0.0 || TOP_EDGE < top_right->p ) {
+    fprintf( stderr, "\nAmount panorama goes up to be in interval %s\n", 
+          UP_RANGE );
+    ++problem;
+  }
+
+  if( bot_left->p < BOT_EDGE || 0.0 < bot_left->p ) {
+    fprintf( stderr, 
+             "\nAmount panorama goes down needs to be in interval %s\n",
+             DOWN_RANGE );
+    ++problem;
+  }
+
+  if( hover < -100.0 || 100.0 < hover ) {
+    fprintf( stderr, "\nHorizontal overlap percentage needs to be in range " );
+    fprintf( stderr, "[-100.0,100.0] \n" );
+    ++problem;
+  }
+
+  if( yover < -100.0 || 50.0 < yover ) {
+    fprintf( stderr, "\nVertical overlap percentage needs to be in range " );
+    fprintf( stderr, "[-100.0,50.0] \n" );
+    ++problem;
+  }
+
+  if( problem ) {
+    usage();
+    fprintf( stderr, "\nThere were %d problems total\n", problem);
+    return -1;
+  }
+
+
   /********* Start of gigapan loops and coordinate printing *******************/  
   
-  /* open output file, check for errors */
   FILE* output = fopen( filename, "w" );
   
   if( !output ) {
@@ -212,8 +210,8 @@ int main( int argc, char** argv ) {
     return -1;
   }
   
-  /* allocate "current" point in gigapan, representing how far the pan has 
-   * moved away from the start point */
+  /* allocate current displacement point in gigapan, representing 
+   * how far the pan has moved away from the start point */
   point* curr = (point*)malloc(sizeof(point)); 
   
   if( !curr ) {
@@ -239,63 +237,54 @@ int main( int argc, char** argv ) {
    * Simply vertical field of view with overlap factored in.*/ 
   double pdelta = (1.0 - 0.01*yover)*VFOV;
  
-  /* print the first point */
-  printPt( *start, output );
-
-  /* Top half first. Starts to the right of start point, zigzags across rows */
-  /* begin loop for top half pitches */
+  /* Loop for pitches in top half of gigapan. Starts at start point, goes right
+   * and zigzags as the pitch increases until it hits the top edge. */  
   do {
-    /* optimize the yaw increment */
-    if( opt ) ydelta = yawDelta( (curr->p + start->p), HFOV, VFOV, hover );  
     
-    /* loop for a single yaw row */ 
+    /* if user has chosen to optimize panorama, 
+     * calculate the optimized yaw increment  */
+    if( opt ) ydelta = yawDelta( (curr->p + start->p), HFOV, pdelta, hover );  
+    
+    /* loop for a single row of gigpan  */
     do  {
-      /* increment the yaw */
-      curr->y += hdir*ydelta;
-      /* print current point in row */
+      /* print (start point + current displacement) to output file */
       printPt( shiftPt( curr, start ), output );
-      /* until the yaw is out of bounds */
-    } while( bot_left->y - ydelta < curr->y 
-             && curr->y < top_right->y + ydelta ) ;
+      /* increment the yaw displacement*/
+      curr->y += hdir*ydelta;
+      /* until the yaw displacement is out of bounds */
+    } while( bot_left->y < curr->y && curr->y < top_right->y ) ;
     
-    /* change the yaw increment direction */ 
+    /* change the direction of yaw incremement (to allow alternating rows) */
     hdir *= -1.0;
-    /* increment the pitch */
+    /* Shift the yaw back to the last one printed */
+    curr->y += hdir*ydelta;
+    /* Increment the pitch displacement */
     curr->p += pdelta;
-    /* until the pitch is higher than the top */
-  } while( curr->p < top_right->p + pdelta ); 
+  } while( curr->p < top_right->p ); 
 
-  /* reset the current displacement from start point */
-  curr->p = 0.0; curr->y = 0.0;
-  /* increment the yaw once, so as not to double print the middle point*/
- /*  if( opt ) ydelta = yawDelta( start->p, HFOV, VFOV, hover ); 
-  curr->y = -1.0*ydelta; */
-  /* start moving in opposite direction of first half of middle row */
+  /* shift the current displacement to just left of the start point,  
+   * to avoid double-printing the start point. Next loop will start here. */
+  curr->p = 0.0;
   hdir = -1.0;
+  if( opt ) ydelta = yawDelta( start->p, HFOV, pdelta, hover );
+  curr->y = hdir*ydelta;
 
-  /* Begin loop for bottom half pitches */
+  /* Loop for pitches in bottom half of gigapan. Starts just left of the start 
+   * point, zigzags as the pitch decreases. All the same comments as above. */
   do {
-    /* optimize yaw increment */
-    if( opt ) ydelta = yawDelta( (curr->p + start->p), HFOV, VFOV, hover ); 
     
-    /* loop for single yaw row */
+    if( opt ) ydelta = yawDelta( (curr->p + start->p), HFOV, pdelta, hover ); 
+    
     do {  
-      /* incremement the yaw */
-      curr->y += hdir*ydelta;
-      /* print current point in row */
       printPt( shiftPt( curr, start ), output );
-      /* until the yaw is out of range */
-    } while( bot_left->y - ydelta < curr->y 
-             && curr->y < top_right->y + ydelta );
+      curr->y += hdir*ydelta;
+    } while( bot_left->y < curr->y && curr->y < top_right->y );
     
-    /* change yaw incremement direction */
     hdir *= -1;
-    /* update pitch */
+    curr->y += hdir*ydelta;
     curr->p -= pdelta;
-    /* until the pitch hits the bottom */
-  } while( bot_left->p - pdelta < curr->p ); 
+  } while( bot_left->p < curr->p ); 
 
-  /* close the output file */
   if( fclose(output) ) {
     fprintf( stderr, "\nThere was a problem closing the output file" );
     return -1;
@@ -304,7 +293,6 @@ int main( int argc, char** argv ) {
   puts( "\nThe program has completed successfully. Check \"coords.txt\"" );
   puts( "in the current directory.\n" );
   
-  /* memory management */
   free(start); free(top_right); free(bot_left); free(curr); 
 
   return 0;

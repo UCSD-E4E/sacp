@@ -22,7 +22,6 @@ Makefile: Linux/Unix compatible makefile (assumes you have make
 
 gigapan.h: this has auxiliary functions which are useful for any panorama needs
 
-
 gigapan.c: gigapan coordinate generator. 
   
   -Compilation: try the given make file. "make" or "make gigapan" should do it.
@@ -32,4 +31,7 @@ gigapan.c: gigapan coordinate generator.
           requirements.
 
 
-pdf: includes mathematical background/derivations for everything in gigapan.c
+pdf/tex: includes mathematical background/derivations for everything in gigapan.c
+
+test: just a text file containing some sample parameters for testing the gigapan program.
+      Suggested use - ./gigapan < test > /dev/null
