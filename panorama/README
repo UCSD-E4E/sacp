@@ -7,31 +7,31 @@
  * Author: Sergei I. Radutnuy                 *
  *         sradutnu@ucsd.edu                  *
  *                                            *
- * Last Modified: April 14 2013               *
+ * Last Modified: May 7  2013                 *
  **********************************************/
 
 Files and explanations in UCSD-E4E/sacp/panorama:
 
-Makefile: Linux/Unix compatible makefile (assumes you have make 
-          utility and gcc as a compiler)
+Makefile: Linux/Unix compatible makefile (assumes you have make utility and gcc
+          as a compiler)
   
-  -Targets: gigapan - gigapan coordinate generator, executable named 
-                      "gigapan".
-            clean - removes all object files (.o) and "gigapan"
+  -Targets: gigapan - gigapan coordinate generator, executable named "gigapan".
+            clean   - removes all object files (.o) and "gigapan"
+            re      - make clean && make (gigapan)
 
-
-gigapan.h: this has auxiliary functions which are useful for any panorama needs
+gigapan.h: this has auxiliary functions which are useful for various panorama 
+           needs
 
 gigapan.c: gigapan coordinate generator. 
   
   -Compilation: try the given make file. "make" or "make gigapan" should do it.
   
-  -Usage: should be self explanatory; if using first time, try simply running the 
-          executable. It has an interactive dialog listing all expectations and 
-          requirements.
+  -Usage: Run the executable once, and it will give you an interactive dialog
+          walkthrough, with command line argument syntax at the end.
 
+pdf/tex: includes mathematical background/derivations for everything in 
+         gigapan.c (TODO). The comments in gigapan* should be fairly 
+         comprehensive.
 
-pdf/tex: includes mathematical background/derivations for everything in gigapan.c
-
-test: just a text file containing some sample parameters for testing the gigapan program.
-      Suggested use - ./gigapan < test > /dev/null
+testparams.txt: Text file with sample parameters for conveniently testing the 
+                gigapan program. Suggested use - ./gigapan < test > /dev/null
