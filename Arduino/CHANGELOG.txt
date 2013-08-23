@@ -1,0 +1,24 @@
+AIPControl_and_StabilizationPID:
+
+v3_1: 8/23/2013
+	Added integral anti-windup and reset when error changes sign
+
+v3: 8/8/2013
+	Added PID controller for yaw, changed pitch constraints to orient
+	IMU to facilitate pointing the camera straight down, changed control
+	commands to allow wasd steering
+	
+v2_1: 8/23/2013
+	Added integral anti-windup, reset when error changes sign and
+	PID controller for yaw, to bring v2 code in line with v3_1
+	
+v2final: 7/29/2013
+	Working production code used during Warren Mall test
+	
+cameraControl:
+
+v3: 8/8/2013
+	Added autofocus control
+	
+v2: 7/29/2013
+	Working production code used during Warren Mall test
